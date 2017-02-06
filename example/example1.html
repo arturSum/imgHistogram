@@ -12,11 +12,15 @@
 </head>
 <body>
 
-    <img src="picSource/5.jpg" id="inputImage" />
+    <img src="picSource/2.jpg" id="inputImage" />
+
+    <!--<img src="picSource/2.jpg" id="inputImage2" />-->
 
     <script>
 
-        imgHistogram().show(document.getElementById('inputImage').src);
+        var hist = imgHistogram();
+
+        hist.show(document.getElementById('inputImage').src);
 
     </script>
 

@@ -1,18 +1,26 @@
 ((global)=>{
 
 
-    var createCanvasNode = (width, height, visible = false)=>{
+    var createCanvasNode = (width, height, visibility = false, id='')=>{
 
-      var node = document.createElement('canvas');
+          var node = document.getElementById(id);
 
-      node.width = width;
-      node.height = height;
 
-      if(!visible){
-          node.style.display = 'none';
-      }
+          if(!node){
+              node = document.createElement('canvas');
+          }
 
-      return node;
+
+          node.width = width;
+          node.height = height;
+
+          node.id = id;
+
+          if(!visibility){
+              node.style.display = 'none';
+          }
+
+          return node;
     },
 
 
@@ -66,18 +74,46 @@
     setParams = (user, def)=>{
 
 
+        var width = (()=>{
+
+            return user.width && typeof user.width == 'number'? Math.abs(Math.round(user.width)) : def.width
+
+        })(),
+
+        setXLineDataInterval = (width)=>{
+
+            var minAccepted = 4,
+                userDef = null;
+
+            if(user.xLineDataInterval && typeof user.xLineDataInterval == 'number'){
+
+                userDef = Math.round( Math.abs(user.xLineDataInterval) );
+
+                return userDef >= minAccepted && userDef <= width? userDef : def.xLineDataInterval;
+            }
+
+            return def.xLineDataInterval;
+        };
+
+
+        //#################################################
+
+
         return {
 
-            height : user.height && typeof user.height == 'number'? Math.abs(Math.floor(user.height)) : def.height,
-            width : user.width && typeof user.width == 'number'? Math.abs(Math.floor(user.width)) : def.width
+            width,
+            height : user.height && typeof user.height == 'number'? Math.abs(Math.round(user.height)) : def.height,
+            xLineDataInterval : setXLineDataInterval(width),
 
-        }
+            xAxisScale : typeof user.xAxisScale == 'boolean'? user.xAxisScale : def.xAxisScale,
+            yAxisScale : typeof user.yAxisScale == 'boolean'? user.yAxisScale : def.yAxisScale
 
+        };
 
     },
 
 
-    drawXAxis = (nodeOut, marginSize, requiredDataInterval)=>{
+    drawXAxis = (nodeOut, marginSize, requiredDataInterval, showXAxisScale)=>{
 
         var ctx = nodeOut.getContext('2d'),
             axisLength = nodeOut.width - (2*marginSize),
@@ -97,34 +133,36 @@
         //#################################
 
 
-        var lineQnt = Math.round(255/requiredDataInterval),
-            intervalWidth = Math.round(axisLength/lineQnt);
+        if(showXAxisScale){
 
 
-        for(var i=0; i<lineQnt; i++){
+            for(var i=0; i<255; i+=requiredDataInterval){
 
-            ctx.moveTo(i*intervalWidth, lineLength);
-            ctx.lineTo(i*intervalWidth, 0);
+                ctx.moveTo(Math.round(axisLength*i/255), lineLength);
+                ctx.lineTo(Math.round(axisLength*i/255), 0);
+                ctx.stroke();
+
+                ctx.fillText(`${i}`, (Math.round(axisLength*i/255))-8, 20);
+                ctx.stroke();
+
+            }
+
+            //last one
+            ctx.moveTo(axisLength-1, lineLength);
+            ctx.lineTo(axisLength-1, 0);
             ctx.stroke();
 
-            ctx.fillText(`${i*requiredDataInterval}`, (i*intervalWidth)-8, 20);
+            ctx.fillText(`255`, axisLength-7, 20);
             ctx.stroke();
 
         }
 
-        //last one
-        ctx.moveTo(axisLength-1, lineLength);
-        ctx.lineTo(axisLength-1, 0);
-        ctx.stroke();
-
-        ctx.fillText(`255`, axisLength-7, 20);
-        ctx.stroke();
 
         ctx.restore();
 
     },
 
-    drawYAxis = (nodeOut, marginSize)=>{
+    drawYAxis = (nodeOut, marginSize, showXAxisScale)=>{
 
         var ctx = nodeOut.getContext('2d'),
             axisLength = nodeOut.height - (2*marginSize),
@@ -146,23 +184,68 @@
             intervalWidth = Math.round(axisLength/lineQnt);
 
 
-        for(var i=0; i<lineQnt; i++){
 
-            ctx.moveTo(-lineLength, -i*intervalWidth);
-            ctx.lineTo(0, -i*intervalWidth);
+        if(showXAxisScale){
+
+            for(var i=0; i<lineQnt; i++){
+
+                ctx.moveTo(-lineLength, -i*intervalWidth);
+                ctx.lineTo(0, -i*intervalWidth);
+                ctx.stroke();
+            }
+
+            //last val
+            ctx.moveTo(-lineLength, -axisLength+1);
+            ctx.lineTo(0, -axisLength+1);
             ctx.stroke();
-        }
 
-        //last val
-        ctx.moveTo(-lineLength, -axisLength+1);
-        ctx.lineTo(0, -axisLength+1);
-        ctx.stroke();
+
+        }
 
         ctx.restore();
 
         //text
         ctx.fillText(`max`, marginSize-10, marginSize-10);
         ctx.stroke();
+
+    },
+
+    drawGraph = (colorsMap, outNode, marginSize, maxVal)=>{
+
+            var ctx = outNode.getContext('2d'),
+                availableGraphColor = {R:'red', G:'green', B:'blue'},
+                colorKeys = Object.keys(colorsMap),
+                colorQnt = colorKeys.length,
+                yAxisLength = outNode.height - (2*marginSize),
+                xAxisLength = outNode.width - (2*marginSize);
+
+
+            while(colorQnt--){
+
+                ctx.save();
+
+                //set start position
+                ctx.translate(marginSize+1, marginSize + yAxisLength);
+
+                ctx.beginPath();
+
+                //first val
+                ctx.moveTo(0, -Math.round(yAxisLength*colorsMap[colorKeys[colorQnt]][0]/maxVal ));
+                ctx.strokeStyle = availableGraphColor[colorKeys[colorQnt]];
+
+                //next val
+                for(var i=1; i<255; i++){
+
+                    ctx.lineTo(
+                        Math.round(xAxisLength*i/255),
+                        -Math.round(yAxisLength*colorsMap[colorKeys[colorQnt]][i]/maxVal)
+                    );
+
+                }
+
+                ctx.stroke();
+                ctx.restore();
+            }
 
     };
 
@@ -174,7 +257,10 @@
     var defaultConfig = {
 
         height : 400,
-        width : 600
+        width : 600,
+        xLineDataInterval : 16,
+        xAxisScale : true,
+        yAxisScale : true
 
 
 
@@ -200,10 +286,8 @@
             canvasOutNode, ctxOut,
             colorsMap, maxRgbVal,
 
-
-            params = setParams(conf, defaultConfig),
-            marginSize = 40;
-
+            marginSize = 40,
+            params = setParams(conf, defaultConfig);
 
 
 
@@ -224,14 +308,13 @@
                 }
 
 
-
                 inImg.onload = function(){
 
 
                     canvasInNode = createCanvasNode(this.width, this.height);
                     document.body.appendChild(canvasInNode);
-                    ctxIn = canvasInNode.getContext('2d');
 
+                    ctxIn = canvasInNode.getContext('2d');
 
                     ctxIn.drawImage(this, 0, 0);
 
@@ -242,37 +325,22 @@
 
                     maxRgbVal = Math.max(...findMaximumVal(colorsMap));
 
-                    console.log('color map: ', colorsMap);
-                    console.log(maxRgbVal);
 
-                    canvasOutNode = createCanvasNode(params.width, params.height, true);
+                    canvasOutNode = createCanvasNode(params.width, params.height, true, 'graph');
                     document.body.appendChild(canvasOutNode);
                     ctxOut = canvasOutNode.getContext('2d');
 
 
-                    drawXAxis(canvasOutNode, marginSize, 16);
-                    drawYAxis(canvasOutNode, marginSize, maxRgbVal, 1000);
+                    drawXAxis(canvasOutNode, marginSize, params.xLineDataInterval, params.xAxisScale);
+                    drawYAxis(canvasOutNode, marginSize, params.yAxisScale);
 
-
-
+                    drawGraph(colorsMap, canvasOutNode, marginSize, maxRgbVal);
 
 
 
                 };
 
-
                 inImg.src = inputSrc;
-
-
-
-
-
-
-
-
-
-
-
 
             }
 
@@ -281,7 +349,6 @@
 
 
     };
-
 
 
 
