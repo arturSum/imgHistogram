@@ -112,7 +112,7 @@
 
         }
 
-        //last one label
+        //last one
         ctx.moveTo(axisLength-1, lineLength);
         ctx.lineTo(axisLength-1, 0);
         ctx.stroke();
@@ -124,12 +124,11 @@
 
     },
 
-    drawYAxis = (nodeOut, marginSize, maxVal)=>{
+    drawYAxis = (nodeOut, marginSize)=>{
 
         var ctx = nodeOut.getContext('2d'),
             axisLength = nodeOut.height - (2*marginSize),
             lineLength = 5;
-
 
 
         ctx.save();
@@ -140,27 +139,30 @@
         ctx.stroke();
 
 
-        var lineQnt = 10,
-            lineDrawLength = axisLength/lineQnt;
+        //#####################################
 
+
+        var lineQnt = 10,
+            intervalWidth = Math.round(axisLength/lineQnt);
 
 
         for(var i=0; i<lineQnt; i++){
 
-            ctx.moveTo(-lineLength, -i*lineDrawLength);
-            ctx.lineTo(0, -i*lineDrawLength);
+            ctx.moveTo(-lineLength, -i*intervalWidth);
+            ctx.lineTo(0, -i*intervalWidth);
             ctx.stroke();
-
-            // ctx.fillText(`10000`, -20, (i*lineDrawLength)+4);
-            // ctx.stroke();
-
         }
 
-        //last
+        //last val
         ctx.moveTo(-lineLength, -axisLength+1);
         ctx.lineTo(0, -axisLength+1);
         ctx.stroke();
 
+        ctx.restore();
+
+        //text
+        ctx.fillText(`max`, marginSize-10, marginSize-10);
+        ctx.stroke();
 
     };
 
@@ -248,9 +250,8 @@
                     ctxOut = canvasOutNode.getContext('2d');
 
 
-
                     drawXAxis(canvasOutNode, marginSize, 16);
-                    drawYAxis(canvasOutNode, marginSize, maxRgbVal);
+                    drawYAxis(canvasOutNode, marginSize, maxRgbVal, 1000);
 
 
 
