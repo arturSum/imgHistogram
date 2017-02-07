@@ -1,12 +1,15 @@
-#graph{
+*{
+    margin : 0;
+    padding: 0;
+}
+
+
+#imgHist-graph{
+
     outline: 1px solid red;
 
-
-    /*background-color: white;*/
-    /*position: absolute;*/
-    /*top:0;*/
-    /*left:0;*/
-
+    background-color: white;
+    position: absolute;
 
 
 }

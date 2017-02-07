@@ -1,26 +1,36 @@
+//outNode id: imgHist-graph
+
+
 ((global)=>{
 
 
-    var createCanvasNode = (width, height, visibility = false, id='')=>{
+    var createCanvasNode = (width, height, id, visibility)=>{
 
-          var node = document.getElementById(id);
+          var existingNode = document.getElementById(id),
+              newNode = document.createElement('canvas');
+
+          newNode.width = width;
+          newNode.height = height;
+          newNode.id = id;
 
 
-          if(!node){
-              node = document.createElement('canvas');
-          }
-
-
-          node.width = width;
-          node.height = height;
-
-          node.id = id;
 
           if(!visibility){
-              node.style.display = 'none';
+              newNode.style.display = 'none';
           }
 
-          return node;
+
+
+          if(existingNode){
+
+             document.body.replaceChild(newNode, existingNode);
+          }
+          else{
+
+             document.body.appendChild(newNode);
+          }
+
+          return newNode;
     },
 
 
@@ -32,7 +42,6 @@
                 G : new Array(256).fill(0),
                 B : new Array(256).fill(0)
             };
-
 
 
         for(var i=0; i<imgDataQnt; i+=4){
@@ -119,11 +128,12 @@
             axisLength = nodeOut.width - (2*marginSize),
             lineLength = 5;
 
-
         //draw axis
         ctx.save();
         ctx.translate(marginSize, nodeOut.height - marginSize);
 
+
+        ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(axisLength, 0);
 
@@ -132,6 +142,7 @@
 
         //#################################
 
+        ctx.beginPath();
 
         if(showXAxisScale){
 
@@ -148,6 +159,7 @@
             }
 
             //last one
+            ctx.beginPath();
             ctx.moveTo(axisLength-1, lineLength);
             ctx.lineTo(axisLength-1, 0);
             ctx.stroke();
@@ -172,6 +184,7 @@
         ctx.save();
         ctx.translate(marginSize, marginSize + axisLength);
 
+        ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(0, -axisLength);
         ctx.stroke();
@@ -184,6 +197,7 @@
             intervalWidth = Math.round(axisLength/lineQnt);
 
 
+        ctx.beginPath();
 
         if(showXAxisScale){
 
@@ -195,6 +209,7 @@
             }
 
             //last val
+            ctx.beginPath();
             ctx.moveTo(-lineLength, -axisLength+1);
             ctx.lineTo(0, -axisLength+1);
             ctx.stroke();
@@ -281,66 +296,59 @@
     var imgHistogram = (conf=defaultConfig)=>{
 
 
-        var inImg = new Image(),
-            canvasInNode, ctxIn,
-            canvasOutNode, ctxOut,
-            colorsMap, maxRgbVal,
 
-            marginSize = 40,
-            params = setParams(conf, defaultConfig);
+        var params = setParams(conf, defaultConfig),
+            canvasOutNode = createCanvasNode(params.width, params.height, 'imgHist-graph', true),
 
-
-
-
+            canvasInNode,
+            ctxIn,
+            colorsMap,
+            maxRgbVal,
+            marginSize = 40;
 
 
         return{
 
 
-            show(inputSrc){
+            show(inputImg){
 
-
-                if(!inputSrc){
+                if(!inputImg){
                     throw {
                         id:1,
                         msg: 'Input image source are required'
                     }
                 }
 
+                if(!inputImg.naturalHeight){
+                    throw {
+                        id:2,
+                        msg: 'Input image not loaded yet'
+                    }
+                }
 
-                inImg.onload = function(){
-
-
-                    canvasInNode = createCanvasNode(this.width, this.height);
-                    document.body.appendChild(canvasInNode);
-
-                    ctxIn = canvasInNode.getContext('2d');
-
-                    ctxIn.drawImage(this, 0, 0);
-
-
-                    colorsMap = createColorsMap(
-                        ctxIn.getImageData(0, 0, this.width, this.height).data
-                    );
-
-                    maxRgbVal = Math.max(...findMaximumVal(colorsMap));
-
-
-                    canvasOutNode = createCanvasNode(params.width, params.height, true, 'graph');
-                    document.body.appendChild(canvasOutNode);
-                    ctxOut = canvasOutNode.getContext('2d');
-
-
-                    drawXAxis(canvasOutNode, marginSize, params.xLineDataInterval, params.xAxisScale);
-                    drawYAxis(canvasOutNode, marginSize, params.yAxisScale);
-
-                    drawGraph(colorsMap, canvasOutNode, marginSize, maxRgbVal);
+                canvasOutNode.getContext('2d').clearRect(0, 0, canvasOutNode.width, canvasOutNode.height);
+                canvasOutNode.style.display = 'block';
 
 
 
-                };
+                canvasInNode = createCanvasNode(inputImg.naturalWidth, inputImg.naturalHeight, 'imgHist-in', false);
 
-                inImg.src = inputSrc;
+
+                ctxIn = canvasInNode.getContext('2d');
+                ctxIn.drawImage(inputImg, 0, 0);
+
+
+                colorsMap = createColorsMap(
+                    ctxIn.getImageData(0, 0, canvasInNode.width, canvasInNode.height).data
+                );
+
+                maxRgbVal = Math.max(...findMaximumVal(colorsMap));
+
+
+                drawXAxis(canvasOutNode, marginSize, params.xLineDataInterval, params.xAxisScale);
+                drawYAxis(canvasOutNode, marginSize, params.yAxisScale);
+
+                drawGraph(colorsMap, canvasOutNode, marginSize, maxRgbVal);
 
             }
 

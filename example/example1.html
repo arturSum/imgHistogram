@@ -9,18 +9,40 @@
 
     <script src="../imgHistogram.js"></script>
 
+
 </head>
 <body>
 
-    <img src="picSource/2.jpg" id="inputImage" />
 
-    <!--<img src="picSource/2.jpg" id="inputImage2" />-->
+    <img src="picSource/2.jpg" id="inputImage" width="400" height="300" />
+
 
     <script>
 
+
         var hist = imgHistogram();
 
-        hist.show(document.getElementById('inputImage').src);
+        window.onload = function(){
+
+            window.addEventListener('dblclick', function(event){
+
+
+                switch(event.target.id){
+
+                    case 'inputImage':
+                        hist.show(event.target);
+                        break;
+
+                    case 'imgHist-graph':
+                        event.target.style.display = 'none';
+
+                }
+
+            });
+
+
+        };
+
 
     </script>
 
