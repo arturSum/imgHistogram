@@ -9,12 +9,30 @@
 
     <script src="../imgHistogram.js"></script>
 
-
 </head>
 <body>
 
+    <div class="description">
+        <h3>1 : Double click on image to show its histogram</h3>
+        <h3>2 : Double click on histogram to close it</h3>
+    </div>
 
-    <img src="picSource/2.jpg" id="inputImage" width="400" height="300" />
+    <div class="dataContainer">
+
+        <img src="picSource/1.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/2.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/3.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/4.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/5.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/6.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/7.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/8.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/9.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/10.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/11.jpg" class="inImg-graph" width="133" height="100" />
+        <img src="picSource/12.jpg" class="inImg-graph" width="133" height="100" />
+
+    </div>
 
 
     <script>
@@ -24,25 +42,28 @@
 
         window.onload = function(){
 
+            var graphNode = document.getElementById('imgHist-graph');
+
             window.addEventListener('dblclick', function(event){
 
+                var sourceNode = event.target;
 
-                switch(event.target.id){
+                if(sourceNode.classList[0] && sourceNode.classList[0].toLowerCase() == 'inimg-graph'){
 
-                    case 'inputImage':
-                        hist.show(event.target);
-                        break;
+                    hist.show(sourceNode);
 
-                    case 'imgHist-graph':
-                        event.target.style.display = 'none';
+                    graphNode.style.top = event.pageY + 'px';
+                    graphNode.style.left = event.pageX + 'px';
 
+                }
+                else if(sourceNode.id && sourceNode.id == 'imgHist-graph'){
+
+                    sourceNode.style.display = 'none';
                 }
 
             });
 
-
         };
-
 
     </script>
 

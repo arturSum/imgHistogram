@@ -3,13 +3,31 @@
     padding: 0;
 }
 
+.description{
+
+    width: 400px;
+    margin: 20px auto;
+}
+
+.dataContainer{
+
+    width: 940px;
+    margin: 0 auto;
+}
+
+
+
 
 #imgHist-graph{
-
-    outline: 1px solid red;
-
-    background-color: white;
     position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+}
 
 
+img{
+    margin:10px;
+}
+
+h3{
+    margin:5px;
 }
