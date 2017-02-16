@@ -13,13 +13,7 @@
           newNode.height = height;
           newNode.id = id;
 
-
-
-          if(!visibility){
-              newNode.style.display = 'none';
-          }
-
-
+          newNode.style.display = !visibility? 'none':'block';
 
           if(existingNode){
 
@@ -132,7 +126,6 @@
         ctx.save();
         ctx.translate(marginSize, nodeOut.height - marginSize);
 
-
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(axisLength, 0);
@@ -227,20 +220,21 @@
 
     drawGraph = (colorsMap, outNode, marginSize, maxVal)=>{
 
-            var ctx = outNode.getContext('2d'),
-                availableGraphColor = {R:'red', G:'green', B:'blue'},
-                colorKeys = Object.keys(colorsMap),
-                colorQnt = colorKeys.length,
-                yAxisLength = outNode.height - (2*marginSize),
-                xAxisLength = outNode.width - (2*marginSize);
+        var ctx = outNode.getContext('2d'),
+            availableGraphColor = {R:'red', G:'green', B:'blue'},
+            colorKeys = Object.keys(colorsMap),
+            colorQnt = colorKeys.length,
+            yAxisLength = outNode.height - (2*marginSize),
+            xAxisLength = outNode.width - (2*marginSize);
+
+
+            ctx.save();
+
+            //set start position
+            ctx.translate(marginSize+1, marginSize + yAxisLength);
 
 
             while(colorQnt--){
-
-                ctx.save();
-
-                //set start position
-                ctx.translate(marginSize+1, marginSize + yAxisLength);
 
                 ctx.beginPath();
 
@@ -259,9 +253,9 @@
                 }
 
                 ctx.stroke();
-                ctx.restore();
             }
 
+        ctx.restore();
     };
 
 
@@ -280,14 +274,6 @@
 
 
     };
-
-
-
-
-
-
-
-
 
     //#########################################
 
@@ -359,8 +345,18 @@
     };
 
 
-
     global.imgHistogram = imgHistogram;
+
+    global.imgHistogram.test = {
+        createCanvasNode,
+        createColorsMap,
+        findMaximumVal,
+        setParams,
+        drawXAxis,
+        drawYAxis,
+        drawGraph
+    }
+
 
 
 })(window);
