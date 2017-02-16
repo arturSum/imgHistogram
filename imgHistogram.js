@@ -1,5 +1,10 @@
-//outNode id: imgHist-graph
 
+/*
+    Author: zlecenia.html@gmail.com
+    Licence : MIT
+ */
+
+//outNode id: imgHist-graph
 
 ((global)=>{
 
